@@ -1,0 +1,55 @@
+/* Modal CSS */
+#billingModal * {
+  font-size: 12px;
+  font-family: "Times New Roman";
+}
+
+#billingModal td,
+#billingModal th,
+#billingModal tr,
+#billingModal table {
+  border-top: 1px solid black;
+  border-collapse: collapse;
+}
+
+#billingModal td.description,
+#billingModal th.description {
+  width: 75px;
+  max-width: 75px;
+}
+
+#billingModal td.quantity,
+#billingModal th.quantity {
+  width: 40px;
+  max-width: 40px;
+  word-break: break-all;
+}
+
+#billingModal td.price,
+#billingModal th.price {
+  width: 50px;
+  max-width: 50px;
+  word-break: break-all;
+}
+
+#billingModal .centered {
+  text-align: center;
+  align-content: center;
+}
+
+#billingModal .ticket {
+  width: 215px;
+  max-width: 215px;
+}
+
+#billingModal img {
+  max-width: inherit;
+  width: inherit;
+}
+
+@media print {
+  #billingModal .hidden-print,
+  #billingModal .hidden-print * {
+    display: none !important;
+  }
+}

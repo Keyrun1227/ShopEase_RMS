@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="css/admin.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="table-responsive">
+        <div class="table-wrapper">
+          <div class="table-title">
+            <div class="row">
+              <div class="col-xs-6">
+                <h2>Product <b>Management</b></h2>
+              </div>
+              <div class="col-xs-6">
+                <a href="#productFormModal" class="btn btn-success" data-toggle="modal" onclick="resetModalForm()"><i class="material-icons">&#xE147;</i> <span>Add New Product</span></a>
+              </div>
+            </div>
+          </div>
+
+          <table id="datatable" class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Product ID</th>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Quantity</th>
+                <th>Normal Price</th>
+                <th>Discount Price</th>
+                <th>Barcode</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="productFormModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="add-product-form">
+            <div class="modal-header">
+              <h4 class="modal-title">Add New Product</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="product-id">Product ID:</label>
+                <input type="text" id="product-id" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="product-name">Product Name:</label>
+                <input type="text" id="product-name" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="product-brand">Brand:</label>
+                <input type="text" id="product-brand" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="product-quantity">Quantity:</label>
+                <input type="number" id="product-quantity" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="productNP">Normal Price:</label>
+                <input type="number" id="productNP" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="productDP">Discount Price:</label>
+                <input type="number" id="productDP" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="product-barcode">Barcode:</label>
+                <input type="text" id="product-barcode" class="form-control" required />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+              <input type="submit" class="btn btn-success" value="Add" />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <script src="js/config.js"></script>
+
+    <script>
+      let table = new DataTable("#datatable");
+      let products = [];
+
+      const productsRef = db.collection("products");
+
+      productsRef.onSnapshot((snapshot) => {
+        table.clear().draw();
+
+        snapshot.forEach((doc) => {
+          var id = doc.id;
+          var product = doc.data();
+
+          products.push({ id: id, ...product });
+
+          var dataSet = [
+            product.productId,
+            product.name,
+            product.brand,
+            product.available_quantity,
+            product.normal_price,
+            product.discount_price,
+            product.barcode,
+            `<a href="#productFormModal" class="edit" data-id="${id}" data-toggle="modal" onclick="populateEditForm('${id}')">
+                <i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+            </a>
+            <a href="#" class="delete" data-id="${id}" data-toggle="modal" onclick="deleteProduct('${id}')">
+                <i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+            </a>`,
+          ];
+
+          table.rows.add([dataSet]).draw();
+        });
+      });
+
+      function resetModalForm() {
+        const form = document.getElementById("add-product-form");
+        form.reset();
+        const submitButton = form.querySelector(".btn-success");
+        submitButton.removeAttribute("data-id");
+      }
+
+      const addProductForm = document.getElementById("add-product-form");
+      addProductForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const submitButton = event.target.querySelector(".btn-success");
+        const productId = document.getElementById("product-id").value;
+        const productName = document.getElementById("product-name").value;
+        const productBrand = document.getElementById("product-brand").value;
+        const productQuantity = document.getElementById("product-quantity").value;
+        const productNP = document.getElementById("productNP").value;
+        const productDP = document.getElementById("productDP").value;
+        const productBarcode = document.getElementById("product-barcode").value;
+
+        let data = {
+          productId: productId,
+          name: productName,
+          brand: productBrand,
+          available_quantity: Number(productQuantity),
+          normal_price: Number(productNP),
+          discount_price: Number(productDP),
+          barcode: productBarcode,
+        };
+
+        if (submitButton.hasAttribute("data-id")) {
+          const productKey = submitButton.getAttribute("data-id");
+          await productsRef.doc(productKey).update(data);
+        } else {
+          await productsRef.add(data);
+        }
+
+        $("#productFormModal").modal("hide");
+      });
+
+      function populateEditForm(key) {
+        let index = products.findIndex((e) => e.id == key);
+        if (index != -1) {
+          let product = products[index];
+
+          document.getElementById("product-id").value = product.productId;
+          document.getElementById("product-name").value = product.name;
+          document.getElementById("product-brand").value = product.brand;
+          document.getElementById("product-quantity").value = product.available_quantity;
+          document.getElementById("productNP").value = product.normal_price;
+          document.getElementById("productDP").value = product.discount_price;
+          document.getElementById("product-barcode").value = product.barcode;
+        }
+
+        const editSubmitButton = document.querySelector("#productFormModal .btn-success");
+        editSubmitButton.setAttribute("data-id", key);
+      }
+
+      async function deleteProduct(key) {
+        await productsRef.doc(key).delete();
+      }
+    </script>
+  </body>
+</html>
