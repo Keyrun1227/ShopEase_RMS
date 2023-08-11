@@ -59,13 +59,12 @@ document.addEventListener("DOMContentLoaded", function () {
   
 });
 
-
-
 function searchAndAddProduct() {
-  const productId = document.getElementById("product-search-bar").value.trim();
-  if (productId !== "") {
-    const existProduct = cartProducts.find((item) => item.productId === productId);
-    const foundProduct = products.find((item) => item.productId === productId);
+  const searchText = document.getElementById("product-search-bar").value.trim();
+  if (searchText !== "") {
+    const existProduct = cartProducts.find((item) => item.productId === searchText);
+    const foundProduct = products.find((item) => item.productId === searchText || item.name.toLowerCase().includes(searchText.toLowerCase()));
+    
     if (existProduct) {
       if (existProduct.available_quantity > existProduct.quantity) {
         existProduct.quantity += 1;
@@ -81,13 +80,40 @@ function searchAndAddProduct() {
     } else {
       alert("No product found!");
     }
-
   }
 
-
   updateCartUI();
-  document.getElementById("product-search-bar").value="";
+  document.getElementById("product-search-bar").value = "";
 }
+
+
+// function searchAndAddProduct() {
+//   const productId = document.getElementById("product-search-bar").value.trim();
+//   if (productId !== "") {
+//     const existProduct = cartProducts.find((item) => item.productId === productId);
+//     const foundProduct = products.find((item) => item.productId === productId);
+//     if (existProduct) {
+//       if (existProduct.available_quantity > existProduct.quantity) {
+//         existProduct.quantity += 1;
+//       } else {
+//         alert("Product out of stock.");
+//       }
+//     } else if (foundProduct) {
+//       if (foundProduct.available_quantity > 0) {
+//         cartProducts.push(new ProductInfo(foundProduct));
+//       } else {
+//         alert("Product out of stock.");
+//       }
+//     } else {
+//       alert("No product found!");
+//     }
+
+//   }
+
+
+//   updateCartUI();
+//   document.getElementById("product-search-bar").value="";
+// }
 
 async function checkout() {
   if (cartProducts.length === 0) {
